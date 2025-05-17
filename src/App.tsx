@@ -1,25 +1,40 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import OrderPage from './pages/OrderPage';
+import CheckoutPage from './pages/CheckoutPage';
+import CompletePage from './pages/CompletePage';
+
+// 맥도날드 테마 설정
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#FF0000', // 맥도날드 빨간색
+      dark: '#C00000',
+      light: '#FF4D4D',
+    },
+    secondary: {
+      main: '#FFC72C', // 맥도날드 노란색
+    },
+  },
+  typography: {
+    fontFamily: '"Noto Sans KR", "Roboto", "Helvetica", "Arial", sans-serif',
+  },
+});
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Router>
+        <Routes>
+          <Route path="/" element={<OrderPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/complete" element={<CompletePage />} />
+        </Routes>
+      </Router>
+    </ThemeProvider>
   );
 }
 
