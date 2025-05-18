@@ -11,7 +11,7 @@ import {
   List,
   ListItem,
   ListItemText,
-  IconButton,
+  // IconButton,
   useTheme
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -26,7 +26,7 @@ const CheckoutPage: React.FC = () => {
     cartItems,
     customerName,
     customerPhone,
-    setCustomerInfo,
+    // setCustomerInfo,
     completeOrder
   } = useOrderStore();
   
@@ -76,7 +76,7 @@ const CheckoutPage: React.FC = () => {
     setIsProcessing(true);
     
     // 고객 정보 저장
-    setCustomerInfo(name, phone);
+    // setCustomerInfo(name, phone);
     
     // 주문 처리
     const success = await completeOrder();

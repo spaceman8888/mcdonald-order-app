@@ -17,27 +17,27 @@ const getSystemPrompt = (cartItems: CartItem[]) => {
   
   return `당신은 맥도날드 주문을 돕는 AI 주문 도우미입니다. 고객이 메뉴를 선택하고 주문할 수 있도록 친절하게 안내해 주세요.
 
-현재 고객의 장바구니:
-${cartSummary}
+    현재 고객의 장바구니:
+    ${cartSummary}
 
-당신의 역할:
-1. 고객의 메뉴 질문에 답변하기 (메뉴 추천, 메뉴 설명 등)
-2. 고객이 원하는 메뉴를 장바구니에 추가하기
-3. 고객이 요청하면 메뉴 수량 변경하기
-4. 고객이 요청하면 장바구니에서 메뉴 제거하기
-5. 주문을 완료할 준비가 되었는지 확인하기
+    당신의 역할:
+    1. 고객의 메뉴 질문에 답변하기 (메뉴 추천, 메뉴 설명 등)
+    2. 고객이 원하는 메뉴를 장바구니에 추가하기
+    3. 고객이 요청하면 메뉴 수량 변경하기
+    4. 고객이 요청하면 장바구니에서 메뉴 제거하기
+    5. 주문을 완료할 준비가 되었는지 확인하기
 
-고객이 메뉴를 주문하려 할 때는 다음 형식으로 응답해주세요:
-MENU_ADD|메뉴ID|수량|옵션ID1,옵션ID2,...
+    고객이 메뉴를 주문하려 할 때는 다음 형식으로 응답해주세요:
+    MENU_ADD|메뉴ID|수량|옵션ID1,옵션ID2,...
 
-고객이 수량을 변경하려 할 때는 다음 형식으로 응답해주세요:
-MENU_UPDATE|메뉴이름|수량
+    고객이 수량을 변경하려 할 때는 다음 형식으로 응답해주세요:
+    MENU_UPDATE|메뉴이름|수량
 
-고객이 메뉴를 제거하려 할 때는 다음 형식으로 응답해주세요:
-MENU_REMOVE|메뉴이름
+    고객이 메뉴를 제거하려 할 때는 다음 형식으로 응답해주세요:
+    MENU_REMOVE|메뉴이름
 
-일반적인 대화는 그냥 자연스럽게 응답하세요.
-`;
+    일반적인 대화는 그냥 자연스럽게 응답하세요.
+    `;
 };
 
 // 장바구니 항목 형식화
@@ -129,7 +129,7 @@ export class OrderAssistant {
       // 대화 모델에 전달할 메시지 구성
       const messages = [
         systemMessage,
-        ...this.conversationState.messages.filter(m => !(m instanceof SystemMessage)),
+        ...this.conversationState.messages.filter(m => !(m instanceof SystemMessage)), // 시스템 메시지 제외
         humanMessage
       ];
       
@@ -149,11 +149,17 @@ export class OrderAssistant {
       
       // 특별 명령어 확인 (메뉴 추가/수정/삭제)
       let action = undefined;
+
+      console.log('content', content);
       
       if (content.includes('MENU_ADD|')) {
         const match = content.match(/MENU_ADD\|(\d+)\|(\d+)(?:\|([\d,]+))?/);
+
+        console.log('match', match);
+        
         if (match) {
           const [_, menuId, quantity, optionsStr] = match;
+          console.log(_);
           const options = optionsStr ? optionsStr.split(',').map(Number) : [];
           
           action = {
@@ -169,6 +175,7 @@ export class OrderAssistant {
         const match = content.match(/MENU_UPDATE\|(.*)\|(\d+)/);
         if (match) {
           const [_, menuName, quantity] = match;
+          console.log(_);
           action = {
             type: 'UPDATE_MENU',
             payload: { 
@@ -181,6 +188,7 @@ export class OrderAssistant {
         const match = content.match(/MENU_REMOVE\|(.*)/);
         if (match) {
           const [_, menuName] = match;
+          console.log(_);
           action = {
             type: 'REMOVE_MENU',
             payload: { menuName }

@@ -6,47 +6,46 @@ import * as orderService from '../services/orderService';
 import { OrderAssistant } from '../services/langchainService';
 
 
-
 interface OrderState {
-    // 세션 상태
-    sessionId: string;
-    
-    // 채팅 상태
-    chatMessages: ChatMessage[];
-    isLoading: boolean;
-    orderAssistant: OrderAssistant | null;
-    
-    // 메뉴 상태
-    menuCategories: MenuCategory[];
-    selectedCategoryId: number | null;
-    menuItems: MenuItem[];
-    isMenuLoading: boolean;
-    
-    // 장바구니 상태
-    cartItems: CartItem[];
-    
-    // 주문 상태
-    customerName: string;
-    customerPhone: string;
-    
-    // 액션
-    initializeSession: () => void;
-    sendMessage: (message: string) => Promise<void>;
-    loadMenuCategories: () => Promise<void>;
-    loadMenuItems: (categoryId: number) => Promise<void>;
-    selectCategory: (categoryId: number) => void;
-    addToCart: (menuItem: MenuItem) => Promise<void>;
-    removeFromCart: (index: number) => void;
-    changeItemQuantity: (index: number, newQuantity: number) => void;
-    setCustomerInfo: (name: string, phone: string) => void;
-    completeOrder: () => Promise<boolean>;
-    clearCart: () => void;
-    addItemToCartById: (menuId: number, quantity?: number, optionIds?: number[]) => Promise<void>;
-    updateItemQuantityByName: (menuName: string, quantity: number) => void;
-    removeItemByName: (menuName: string) => void;
-  }
+  // 세션 상태
+  sessionId: string;
+
+  // 채팅 상태
+  chatMessages: ChatMessage[];
+  isLoading: boolean;
+  orderAssistant: OrderAssistant | null;
+
+  // 메뉴 상태
+  menuCategories: MenuCategory[];
+  selectedCategoryId: number | null;
+  menuItems: MenuItem[];
+  isMenuLoading: boolean;
+
+  // 장바구니 상태
+  cartItems: CartItem[];
+
+  // 주문 상태
+  customerName: string;
+  customerPhone: string;
+
+  // 액션
+  initializeSession: () => void;
+  sendMessage: (message: string) => Promise<void>;
+  loadMenuCategories: () => Promise<void>;
+  loadMenuItems: (categoryId: number) => Promise<void>;
+  selectCategory: (categoryId: number) => void;
+  addToCart: (menuItem: MenuItem) => Promise<void>;
+  removeFromCart: (index: number) => void;
+  changeItemQuantity: (index: number, newQuantity: number) => void;
+  // setCustomerInfo: (name: string, phone: string) => void;
+  completeOrder: () => Promise<boolean>;
+  clearCart: () => void;
+  addItemToCartById: (menuId: number, quantity?: number, optionIds?: number[]) => Promise<void>;
+  updateItemQuantityByName: (menuName: string, quantity: number) => void;
+  removeItemByName: (menuName: string) => void;
+}
   
-  export const useOrderStore = create<OrderState>((set, get) => ({
+export const useOrderStore = create<OrderState>((set, get) => ({
     // 초기 상태
     sessionId: '',
     chatMessages: [],
@@ -63,13 +62,13 @@ interface OrderState {
     // 세션 초기화
     initializeSession: () => {
       const sessionId = uuidv4();
-      const assistant = new OrderAssistant();
+      const orderAssistant = new OrderAssistant();
       
-      assistant.initializeConversation();
+      orderAssistant.initializeConversation();
       
       set({
         sessionId,
-        orderAssistant: assistant,
+        orderAssistant,
         chatMessages: [
           {
             role: 'assistant',
@@ -95,7 +94,6 @@ interface OrderState {
         ...chatMessages,
         { role: 'user', content: message }
       ];
-      
       set({ chatMessages: updatedMessages as ChatMessage[] });
       
       try {
@@ -117,6 +115,9 @@ interface OrderState {
           switch (type) {
             case 'ADD_MENU': {
               const { menuId, quantity, options } = payload;
+              console.log('menuId', menuId);
+              console.log('quantity', quantity);
+              console.log('options', options);
               await get().addItemToCartById(menuId, quantity, options as number[]);
               break;
             }
@@ -400,13 +401,13 @@ interface OrderState {
       }
     },
     
-    // 고객 정보 설정
-    setCustomerInfo: (name: string, phone: string) => {
-      set({
-        customerName: name,
-        customerPhone: phone
-      });
-    },
+    // 고객 정보 설정(제거 예정)
+    // setCustomerInfo: (name: string, phone: string) => {
+    //   set({
+    //     customerName: name,
+    //     customerPhone: phone
+    //   });
+    // },
     
     // 주문 완료
     completeOrder: async () => {
