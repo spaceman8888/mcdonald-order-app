@@ -1,7 +1,7 @@
-import React from 'react';
-import { Grid, Box, Typography, CircularProgress } from '@mui/material';
-import MenuItem from './MenuItem';
-import { MenuItem as MenuItemType } from '../types';
+import React from "react";
+import { Grid, Box, Typography, CircularProgress } from "@mui/material";
+import MenuItem from "./MenuItem";
+import { MenuItem as MenuItemType } from "../types";
 
 interface MenuListProps {
   items: MenuItemType[];
@@ -9,16 +9,20 @@ interface MenuListProps {
   onSelectItem: (item: MenuItemType) => void;
 }
 
-const MenuList: React.FC<MenuListProps> = ({ items, isLoading, onSelectItem }) => {
+const MenuList: React.FC<MenuListProps> = ({
+  items,
+  isLoading,
+  onSelectItem,
+}) => {
   if (isLoading) {
     return (
       <Box
         sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100%',
-          p: 4
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100%",
+          p: 4,
         }}
       >
         <CircularProgress />
@@ -30,11 +34,11 @@ const MenuList: React.FC<MenuListProps> = ({ items, isLoading, onSelectItem }) =
     return (
       <Box
         sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100%',
-          p: 4
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100%",
+          p: 4,
         }}
       >
         <Typography variant="body1" color="text.secondary">
@@ -47,7 +51,7 @@ const MenuList: React.FC<MenuListProps> = ({ items, isLoading, onSelectItem }) =
   return (
     <Grid container spacing={1} sx={{ p: 1 }}>
       {items.map((item) => (
-        <Box sx={{ width: { xs: '100%', sm: '50%', md: '30%' }, p: 1 }} key={item.id}>
+        <Box sx={{ width: { xs: "100%", sm: "50%", md: "32%" } }} key={item.id}>
           <MenuItem item={item} onSelect={onSelectItem} />
         </Box>
       ))}
