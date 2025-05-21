@@ -4,6 +4,7 @@ import { CartItem, ChatMessage, MenuCategory, MenuItem } from '../types';
 import * as menuService from '../services/menuService';
 import * as orderService from '../services/orderService';
 import { OrderAssistant } from '../services/langchainService';
+import { useNavigate } from 'react-router-dom';
 
 
 interface OrderState {
@@ -25,8 +26,9 @@ interface OrderState {
   cartItems: CartItem[];
 
   // 주문 상태
-  customerName: string;
-  customerPhone: string;
+
+  // 네비게이션 상태
+  navigate: ((path: string) => void) | null;
 
   // 액션
   initializeSession: () => void;
@@ -41,11 +43,15 @@ interface OrderState {
   completeOrder: () => Promise<boolean>;
   clearCart: () => void;
   addItemToCartById: (menuId: number, quantity?: number, optionIds?: number[]) => Promise<void>;
-  updateItemQuantityByName: (menuName: string, quantity: number) => void;
-  removeItemByName: (menuName: string) => void;
+  updateItemQuantityByName: (menuId: number, quantity: number) => void;
+  removeItemByName: (menuId: number) => void;
+
+  setNavigate: (navigate: (path: string) => void) => void;
+
 }
   
 export const useOrderStore = create<OrderState>((set, get) => ({
+
     // 초기 상태
     sessionId: '',
     chatMessages: [],
@@ -56,14 +62,13 @@ export const useOrderStore = create<OrderState>((set, get) => ({
     menuItems: [],
     isMenuLoading: false,
     cartItems: [],
-    customerName: '',
-    customerPhone: '',
+    navigate: null,
     
     // 세션 초기화
     initializeSession: () => {
       const sessionId = uuidv4();
       const orderAssistant = new OrderAssistant();
-      
+
       orderAssistant.initializeConversation();
       
       set({
@@ -118,17 +123,47 @@ export const useOrderStore = create<OrderState>((set, get) => ({
               console.log('menuId', menuId);
               console.log('quantity', quantity);
               console.log('options', options);
-              await get().addItemToCartById(menuId, quantity, options as number[]);
+              await get().addItemToCartById(Number(menuId), quantity, options as number[]);
               break;
             }
             case 'UPDATE_MENU': {
-              const { menuName, quantity } = payload;
-              get().updateItemQuantityByName(menuName, quantity as number);
+              const { menuId, quantity } = payload;
+              get().updateItemQuantityByName(Number(menuId), quantity as number);
               break;
             }
             case 'REMOVE_MENU': {
-              const { menuName } = payload;
-              get().removeItemByName(menuName as string);
+              const { menuId } = payload;
+              get().removeItemByName(Number(menuId));
+              break;
+            }
+            case 'SHOW_BURGER': {
+              console.log('SHOW_BURGER');
+              get().loadMenuItems(1);
+              break;
+            }
+            case 'SHOW_SIDE': {
+              console.log('SHOW_SIDE');
+              get().loadMenuItems(2);
+              break;
+            }
+            case 'SHOW_DRINK': {
+              console.log('SHOW_DRINK');
+              get().loadMenuItems(3);
+              break;
+            }
+            case 'SHOW_DESSERT': {
+              console.log('SHOW_DESSERT');
+              get().loadMenuItems(4);
+              break;
+            }
+            case 'ORDER_COMPLETE': {
+              console.log('ORDER_COMPLETE');
+              // /checkout 페이지로 이동
+              const { navigate } = get();
+              if (navigate) {
+                navigate('/checkout');
+              }
+
               break;
             }
           }
@@ -149,6 +184,11 @@ export const useOrderStore = create<OrderState>((set, get) => ({
       } finally {
         set({ isLoading: false });
       }
+    },
+
+    // 네비게이션 함수 설정
+    setNavigate: (navigate) => {
+      set({ navigate });
     },
     
     // 메뉴 카테고리 로드
@@ -175,7 +215,7 @@ export const useOrderStore = create<OrderState>((set, get) => ({
       try {
         set({ isMenuLoading: true });
         const items = await menuService.getMenuItemsByCategory(categoryId);
-        set({ menuItems: items, isMenuLoading: false });
+        set({ menuItems: items, isMenuLoading: false, selectedCategoryId: categoryId });
       } catch (error) {
         console.error('Error loading menu items:', error);
         set({ isMenuLoading: false });
@@ -323,6 +363,7 @@ export const useOrderStore = create<OrderState>((set, get) => ({
     // 장바구니에서 아이템 제거
     removeFromCart: (index: number) => {
       const { cartItems, orderAssistant } = get();
+      console.log('removeFromCart', cartItems, index);
       const updatedCart = cartItems.filter((_, i) => i !== index);
       set({ cartItems: updatedCart });
       
@@ -350,16 +391,21 @@ export const useOrderStore = create<OrderState>((set, get) => ({
     },
     
     // 이름으로 장바구니 아이템 수량 업데이트 (LangChain용)
-    updateItemQuantityByName: (menuName: string, quantity: number) => {
+    updateItemQuantityByName: (menuId: number, quantity: number) => {
       const { cartItems, orderAssistant } = get();
+      console.log('updateItemQuantityByName', cartItems, menuId, quantity);
       
       // 메뉴 이름으로 아이템 찾기
       const index = cartItems.findIndex(
-        item => item.name.toLowerCase().includes(menuName.toLowerCase())
+        item => item.id === menuId
       );
       
       if (index === -1) {
-        console.warn(`Item with name "${menuName}" not found in cart`);
+        console.log("cartItems", typeof cartItems[0].id);
+        console.log("menuId", typeof menuId);
+        console.log("cartItems[0].id==menuId", cartItems[0].id === menuId);
+
+        console.warn(`Item with id "${menuId}" not found in cart`);
         return;
       }
       
@@ -379,16 +425,16 @@ export const useOrderStore = create<OrderState>((set, get) => ({
     },
     
     // 이름으로 장바구니에서 아이템 제거 (LangChain용)
-    removeItemByName: (menuName: string) => {
+    removeItemByName: (menuId: number) => {
       const { cartItems, orderAssistant } = get();
       
       // 메뉴 이름으로 아이템 찾기
       const index = cartItems.findIndex(
-        item => item.name.toLowerCase().includes(menuName.toLowerCase())
+        item => item.id === menuId
       );
       
       if (index === -1) {
-        console.warn(`Item with name "${menuName}" not found in cart`);
+        console.warn(`Item with id "${menuId}" not found in cart`);
         return;
       }
       
@@ -411,7 +457,7 @@ export const useOrderStore = create<OrderState>((set, get) => ({
     
     // 주문 완료
     completeOrder: async () => {
-      const { cartItems, customerName, customerPhone, sessionId } = get();
+      const { cartItems, sessionId } = get();
       
       if (cartItems.length === 0) {
         return false;
@@ -422,9 +468,7 @@ export const useOrderStore = create<OrderState>((set, get) => ({
         
         // 주문 저장
         await orderService.saveOrder(
-          cartItems,
-          customerName,
-          customerPhone
+          cartItems
         );
         
         // 장바구니 세션 저장

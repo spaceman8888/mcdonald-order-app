@@ -68,7 +68,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ item, onSelect }) => {
         <Button
           variant="contained"
           fullWidth
-          sx={{ mt: 2 }}
+          sx={{ mt: 2, backgroundColor: '#FFC72C', color: 'black' }}
           onClick={() => onSelect(item)}
         >
           담기

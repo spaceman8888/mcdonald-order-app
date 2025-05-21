@@ -27,14 +27,49 @@ const getSystemPrompt = (cartItems: CartItem[]) => {
     4. 고객이 요청하면 장바구니에서 메뉴 제거하기
     5. 주문을 완료할 준비가 되었는지 확인하기
 
+    메뉴와 ID 목록:
+      - 빅맥: 1
+      - 맥스파이시 상하이 버거: 2
+      - 더블 불고기 버거: 3
+      - 더블 쿼터파운더 치즈: 4
+      - 맥치킨: 5
+
+      - 후렌치 후라이: 6
+      - 맥너겟: 7
+      - 맥윙: 8
+      - 치즈스틱: 9
+
+      - 코카콜라: 10
+      - 스프라이트: 11
+      - 환타: 12
+      - 바닐라 쉐이크: 13
+
+      - 베리 스트로베리 맥플러리: 14
+      - 오레오 맥플러리: 15
+      - 딸기 선데이 아이스크림: 16
+      - 초코 선데이 아이스크림: 17
+
     고객이 메뉴를 주문하려 할 때는 다음 형식으로 응답해주세요:
     MENU_ADD|메뉴ID|수량|옵션ID1,옵션ID2,...
 
     고객이 수량을 변경하려 할 때는 다음 형식으로 응답해주세요:
-    MENU_UPDATE|메뉴이름|수량
+    MENU_UPDATE|메뉴ID|수량
+
+    예시:
+      - 콜라 주문: MENU_ADD|10|1
+      - 빅맥 2개 주문: MENU_ADD|1|2
 
     고객이 메뉴를 제거하려 할 때는 다음 형식으로 응답해주세요:
-    MENU_REMOVE|메뉴이름
+    MENU_REMOVE|메뉴ID
+
+    추가적으로 대화중인 메뉴에 따라 아래 형식도 추가해줘
+    SHOW_BURGER
+    SHOW_SIDE
+    SHOW_DRINK
+    SHOW_DESSERT
+
+    주문이 모두 완료되었다는 답변이 있으면 아래 형식으로 응답해줘
+    ORDER_COMPLETE
 
     일반적인 대화는 그냥 자연스럽게 응답하세요.
     `;
@@ -115,7 +150,7 @@ export class OrderAssistant {
   async processMessage(userMessage: string, cartItems: CartItem[] = []): Promise<{
     aiMessage: ChatMessage;
     action?: {
-      type: 'ADD_MENU' | 'UPDATE_MENU' | 'REMOVE_MENU';
+      type: 'ADD_MENU' | 'UPDATE_MENU' | 'REMOVE_MENU' | 'SHOW_BURGER' | 'SHOW_SIDE' | 'SHOW_DRINK' | 'SHOW_DESSERT' | 'ORDER_COMPLETE';
       payload: any;
     };
   }> {
@@ -174,12 +209,12 @@ export class OrderAssistant {
       } else if (content.includes('MENU_UPDATE|')) {
         const match = content.match(/MENU_UPDATE\|(.*)\|(\d+)/);
         if (match) {
-          const [_, menuName, quantity] = match;
+          const [_, menuId, quantity] = match;
           console.log(_);
           action = {
             type: 'UPDATE_MENU',
             payload: { 
-              menuName, 
+              menuId, 
               quantity: parseInt(quantity)
             }
           };
@@ -187,21 +222,53 @@ export class OrderAssistant {
       } else if (content.includes('MENU_REMOVE|')) {
         const match = content.match(/MENU_REMOVE\|(.*)/);
         if (match) {
-          const [_, menuName] = match;
+          const [_, menuId] = match;
           console.log(_);
           action = {
             type: 'REMOVE_MENU',
-            payload: { menuName }
+            payload: { menuId }
+          };
+        }
+      }else if(content.includes('ORDER_COMPLETE')){
+        action = {
+          type: 'ORDER_COMPLETE',
+          payload: {}
+        };
+      }else{
+        if(content.includes('SHOW_BURGER')){
+          action = {
+            type: 'SHOW_BURGER',
+            payload: {}
+          };
+        } else if(content.includes('SHOW_SIDE')){
+          action = {
+            type: 'SHOW_SIDE',
+            payload: {}
+          };
+        } else if(content.includes('SHOW_DRINK')){
+          action = {
+            type: 'SHOW_DRINK',
+            payload: {}
+          };
+        } else if(content.includes('SHOW_DESSERT')){
+          action = {
+            type: 'SHOW_DESSERT',
+            payload: {}
           };
         }
       }
-      
+
       // 특별 명령어가 포함된 응답일 경우 해당 부분 제외하고 사용자에게 보여줄 메시지 생성
       const cleanedContent = content
-        .replace(/MENU_ADD\|(\d+)\|(\d+)(?:\|([\d,]+))?/g, '')
-        .replace(/MENU_UPDATE\|(.*)\|(\d+)/g, '')
-        .replace(/MENU_REMOVE\|(.*)/g, '')
-        .trim();
+      .replace(/MENU_ADD\|(\d+)\|(\d+)(?:\|([\d,]+))?/g, '')
+      .replace(/MENU_UPDATE\|(.*)\|(\d+)/g, '')
+      .replace(/MENU_REMOVE\|(.*)/g, '')
+      .replace(/SHOW_BURGER/g, '')
+      .replace(/SHOW_SIDE/g, '')
+      .replace(/SHOW_DRINK/g, '')
+      .replace(/SHOW_DESSERT/g, '')
+      .replace(/ORDER_COMPLETE/g, '')
+      .trim();
       
       return {
         aiMessage: {
@@ -209,7 +276,7 @@ export class OrderAssistant {
           content: cleanedContent || content,
         },
         action: action as {
-          type: 'ADD_MENU' | 'UPDATE_MENU' | 'REMOVE_MENU';
+          type: 'ADD_MENU' | 'UPDATE_MENU' | 'REMOVE_MENU' | 'SHOW_BURGER' | 'SHOW_SIDE' | 'SHOW_DRINK' | 'SHOW_DESSERT' | 'ORDER_COMPLETE';
           payload: any;
         } | undefined,
       };

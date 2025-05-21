@@ -32,7 +32,7 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
         overflow: 'hidden'
       }}
     >
-      <Box sx={{ p: 2, bgcolor: 'primary.main', color: 'white' }}>
+      <Box sx={{ p: 2, bgcolor: '#FFC72C', color: 'black', textAlign: 'center' }}>
         <Typography variant="h6">AI 주문 도우미</Typography>
       </Box>
       

@@ -42,7 +42,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
           borderRadius: isUser ? '20px 5px 20px 20px' : '5px 20px 20px 20px',
         }}
       >
-        <Typography variant="body1">{message.content}</Typography>
+        <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>{message.content}</Typography>
       </Paper>
       
       {isUser && (

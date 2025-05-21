@@ -32,7 +32,10 @@ const OrderPage: React.FC = () => {
     // 장바구니 상태
     cartItems,
     removeFromCart,
-    changeItemQuantity
+    changeItemQuantity,
+
+    // 네비게이션 상태
+    setNavigate,
   } = useOrderStore();
   
   // 세션 및 메뉴 초기화
@@ -47,6 +50,10 @@ const OrderPage: React.FC = () => {
       navigate('/checkout');
     }
   };
+
+  useEffect(() => {
+    setNavigate(navigate);
+  }, [navigate, setNavigate]);
   
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
@@ -56,7 +63,7 @@ const OrderPage: React.FC = () => {
           component="h1" 
           sx={{ 
             fontWeight: 'bold', 
-            color: theme.palette.primary.main 
+            color: theme.palette.primary.main,
           }}
         >
           맥도날드 대화형 주문

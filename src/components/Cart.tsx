@@ -38,7 +38,7 @@ const Cart: React.FC<CartProps> = ({
         overflow: 'hidden'
       }}
     >
-      <Box sx={{ p: 2, bgcolor: 'primary.main', color: 'white' }}>
+      <Box sx={{ p: 2, bgcolor: '#FFC72C', color: 'black', textAlign: 'center' }}>
         <Typography variant="h6">주문 내역</Typography>
       </Box>
       

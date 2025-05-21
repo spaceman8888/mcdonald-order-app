@@ -16,8 +16,6 @@ export const saveOrder = async(
     const {data : orderData, error:orderError} = await supabase
     .from('orders')
     .insert({
-        customer_name:customerName || null,
-        phone_number:phoneNumber || null,
         total_price:totalAmount,
         order_status:'pending',
     })
