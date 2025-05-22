@@ -1,4 +1,3 @@
-import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -8,6 +7,9 @@ import CompletePage from "./pages/CompletePage";
 import { Box, Typography } from "@mui/material";
 import ChatContainer from "./components/ChatContainer";
 import { useOrderStore } from "./store/orderStore";
+import HomePage from "./pages/HomePage";
+import { useLocation } from "react-router-dom";
+import { useMemo } from "react";
 
 // 맥도날드 테마 설정
 const theme = createTheme({
@@ -34,6 +36,10 @@ function App() {
     sendMessage,
   } = useOrderStore();
 
+  const location = useLocation();
+
+  const isHomePage = useMemo(() => location.pathname === "/", [location]);
+  console.log(isHomePage);
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -56,7 +62,7 @@ function App() {
               color: theme.palette.primary.main,
             }}
           >
-            맥도날드 대화형 주문
+            맥도날드
           </Typography>
         </Box>
         <Box
@@ -67,35 +73,36 @@ function App() {
             mt: 2,
           }}
         >
+          {!isHomePage && (
+            <Box
+              sx={{
+                width: "25%",
+                display: "flex",
+                flexDirection: "column",
+                height: "calc(100vh - 150px)",
+              }}
+            >
+              <ChatContainer
+                messages={chatMessages}
+                isLoading={isLoading}
+                onSendMessage={sendMessage}
+              />
+            </Box>
+          )}
           <Box
             sx={{
-              width: "25%",
-              display: "flex",
-              flexDirection: "column",
-              height: "calc(100vh - 150px)",
-            }}
-          >
-            <ChatContainer
-              messages={chatMessages}
-              isLoading={isLoading}
-              onSendMessage={sendMessage}
-            />
-          </Box>
-          <Box
-            sx={{
-              width: "75%",
+              width: isHomePage ? "100%" : "75%",
               height: "calc(100vh - 150px)",
               display: "flex",
               flexDirection: "column",
             }}
           >
-            <Router>
-              <Routes>
-                <Route path="/" element={<OrderPage />} />
-                <Route path="/checkout" element={<CheckoutPage />} />
-                <Route path="/complete" element={<CompletePage />} />
-              </Routes>
-            </Router>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/order" element={<OrderPage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/complete" element={<CompletePage />} />
+            </Routes>
           </Box>
         </Box>
       </Box>

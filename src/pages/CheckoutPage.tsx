@@ -116,7 +116,7 @@ const CheckoutPage: React.FC = () => {
                 sx={{ border: "1px solid red", color: "red" }}
                 fullWidth
                 size="large"
-                onClick={() => navigate("/")}
+                onClick={() => navigate("/order")}
               >
                 주문으로 돌아가기
               </Button>

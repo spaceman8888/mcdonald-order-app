@@ -5,24 +5,40 @@ import {
   SystemMessage,
   AIMessage,
 } from "@langchain/core/messages";
-import * as menuService from "./menuService";
 import { CartItem, ChatMessage, MenuItem } from "../types";
+import { supabase } from "./supabase";
+import { useOrderStore } from "../store/orderStore";
+import { getMenuItems } from "./menuService";
+// 대화 기록
+interface ConversationState {
+  messages: (HumanMessage | SystemMessage | AIMessage)[];
+}
 
 // LLM 모델 설정
 const chatModel = new ChatOpenAI({
   modelName: "gpt-4o",
-  temperature: 0.1,
+  temperature: 0.4,
   openAIApiKey: process.env.REACT_APP_OPENAI_API_KEY,
 });
 
 // 대화 모델을 위한 시스템 프롬프트 생성
-const getSystemPrompt = (cartItems: CartItem[]) => {
+const getSystemPrompt = async (cartItems: CartItem[]) => {
   const cartSummary = formatCartItems(cartItems);
+  const menuItems = await formatMenuItems();
 
-  return `당신은 맥도날드 주문을 돕는 AI 주문 도우미입니다. 고객이 메뉴를 선택하고 주문할 수 있도록 친절하게 안내해 주세요.
+  const systemPropmpt = `당신은 맥도날드 주문을 돕는 AI 주문 키오스크입니다. 고객이 메뉴를 선택하고 주문할 수 있도록 친절하게 안내해 주세요.
+
+    맥도날드 지점은 부산 해운대구 센텀서로구로 100번길 10 맥도날드 센텀점입니다.
+    만약에 고객이 사투리로 말하면 해당 사투리로 응답해주세요.
 
     현재 고객의 장바구니:
     ${cartSummary}
+
+    메뉴 정보:
+    ${menuItems}
+    
+    주문 번호:
+
 
     당신의 역할:
     1. 고객의 메뉴 질문에 답변하기 (메뉴 추천, 메뉴 설명 등)
@@ -30,54 +46,40 @@ const getSystemPrompt = (cartItems: CartItem[]) => {
     3. 고객이 요청하면 메뉴 수량 변경하기
     4. 고객이 요청하면 장바구니에서 메뉴 제거하기
     5. 주문을 완료할 준비가 되었는지 확인하기
+    6. 메뉴 정보를 그대로 보여주지는 말고 메뉴 이름과 가격만 보여줘
 
-    메뉴와 ID 목록:
-      - 빅맥: 1
-      - 맥스파이시 상하이 버거: 2
-      - 더블 불고기 버거: 3
-      - 더블 쿼터파운더 치즈: 4
-      - 맥치킨: 5
 
-      - 후렌치 후라이: 6
-      - 맥너겟: 7
-      - 맥윙: 8
-      - 치즈스틱: 9
-
-      - 코카콜라: 10
-      - 스프라이트: 11
-      - 환타: 12
-      - 바닐라 쉐이크: 13
-
-      - 베리 스트로베리 맥플러리: 14
-      - 오레오 맥플러리: 15
-      - 딸기 선데이 아이스크림: 16
-      - 초코 선데이 아이스크림: 17
-
-    고객이 메뉴를 주문하려 할 때는 다음 형식으로 응답하고 추가되었다는 메시지를 보내줘:
+    7. 고객이 메뉴를 주문하려 할 때는 다음 형식으로 응답하고 추가되었다는 메시지를 보내줘:
     MENU_ADD|메뉴ID|수량|옵션ID1,옵션ID2,...
 
-    고객이 수량을 변경하려 할 때는 다음 형식으로 응답하고 수량이 변경되었다는 메시지를 보내줘:
+    ex) MENU_ADD|1|1|2
+
+    8.고객이 수량을 변경하려 할 때는 다음 형식으로 응답하고 수량이 변경되었다는 메시지를 보내줘:
     MENU_UPDATE|메뉴ID|수량
 
     예시:
       - 콜라 주문: MENU_ADD|10|1
       - 빅맥 2개 주문: MENU_ADD|1|2
 
-    고객이 메뉴를 제거하려 할 때는 다음 형식으로 응답하고 제거되었다는 메시지를 보내줘:
+    9. 고객이 메뉴를 제거하려 할 때는 다음 형식으로 응답하고 제거되었다는 메시지를 보내줘:
     MENU_REMOVE|메뉴ID
 
-    MENU_ADD, MENU_UPDATE, MENU_REMOVE 형식이 아니면 대화중인 메뉴에 따라 아래 형식으로 응답해줘
+    10. MENU_ADD, MENU_UPDATE, MENU_REMOVE 형식이 아니면 대화중인 메뉴에 따라 아래 형식으로 응답하고 메뉴 추천 메시지를 보내줘
     SHOW_BURGER
     SHOW_SIDE
     SHOW_DRINK
     SHOW_DESSERT
 
-    주문을 완료하겠다는 답변이 있으면 아래 형식으로 응답해주고 끝인사 없이 총 주문 금액이 얼마인지 말해줘
+    11.주문을 완료하겠다는 답변이 있으면 아래 형식으로 응답해주고 끝인사 없이 총 주문 금액이 얼마인지, 결제하라는 메시지를 보내줘
     ORDER_COMPLETE
 
 
-    일반적인 대화는 그냥 자연스럽게 응답하세요.
+    12.일반적인 대화는 그냥 자연스럽게 응답하세요.
     `;
+
+  console.log("systemPropmpt", systemPropmpt);
+
+  return systemPropmpt;
 };
 
 // 장바구니 항목 형식화
@@ -109,38 +111,23 @@ const formatCartItems = (cartItems: CartItem[]): string => {
   );
   result += `\n총 금액: ${totalPrice.toLocaleString()}원`;
 
+  console.log("result", result);
+
   return result;
 };
 
-// 메뉴 검색 정보를 대화 모델에게 전달할 형식으로 변환
-const formatMenuSearchResults = (items: MenuItem[]): string => {
-  if (items.length === 0) return "검색 결과가 없습니다.";
+const formatMenuItems = async () => {
+  const menuItems = (await getMenuItems()) as MenuItem[];
 
-  return items
-    .map(
-      (item) =>
-        `ID: ${item.id}, 이름: ${item.name}, 가격: ${item.price}원${
-          item.calories ? `, 칼로리: ${item.calories}kcal` : ""
-        }`
-    )
-    .join("\n");
+  console.log("menuItems", menuItems);
+  let result = `메뉴 ID - 메뉴 이름 - 가격\n`;
+
+  menuItems.forEach((item) => {
+    result += `${item.id} - ${item.name} - ${item.price}\n`;
+  });
+
+  return result;
 };
-
-// 메뉴 검색 도구
-const searchMenuTool = async (query: string) => {
-  try {
-    const results = await menuService.searchMenuItems(query);
-    return formatMenuSearchResults(results);
-  } catch (error) {
-    console.error("메뉴 검색 중 오류:", error);
-    return "메뉴 검색 중 오류가 발생했습니다.";
-  }
-};
-
-// 대화 기록
-interface ConversationState {
-  messages: (HumanMessage | SystemMessage | AIMessage)[];
-}
 
 // 대화 관리자 클래스
 export class OrderAssistant {
@@ -153,8 +140,8 @@ export class OrderAssistant {
   }
 
   // 대화 초기화
-  initializeConversation(cartItems: CartItem[] = []) {
-    const systemMessage = new SystemMessage(getSystemPrompt(cartItems));
+  async initializeConversation(cartItems: CartItem[] = []) {
+    const systemMessage = new SystemMessage(await getSystemPrompt(cartItems));
     this.conversationState.messages = [systemMessage];
 
     return "대화가 초기화되었습니다.";
@@ -180,8 +167,10 @@ export class OrderAssistant {
     };
   }> {
     try {
+      const systemPrompt = await getSystemPrompt(cartItems);
+
       // 시스템 메시지 업데이트 (최신 장바구니 반영)
-      const systemMessage = new SystemMessage(getSystemPrompt(cartItems));
+      const systemMessage = new SystemMessage(systemPrompt);
 
       // 사용자 메시지 추가
       const humanMessage = new HumanMessage(userMessage);
@@ -305,7 +294,7 @@ export class OrderAssistant {
       return {
         aiMessage: {
           role: "assistant",
-          content: cleanedContent || content,
+          content: cleanedContent,
         },
         action: action as
           | {

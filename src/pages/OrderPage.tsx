@@ -1,14 +1,12 @@
 import React, { useEffect } from "react";
-import { Container, Grid, Box, Typography, useTheme } from "@mui/material";
+import { Container, Grid, Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import ChatContainer from "../components/ChatContainer";
 import MenuCategories from "../components/MenuCategories";
 import MenuList from "../components/MenuList";
 import Cart from "../components/Cart";
 import { useOrderStore } from "../store/orderStore";
 
 const OrderPage: React.FC = () => {
-  const theme = useTheme();
   const navigate = useNavigate();
 
   const {
@@ -35,9 +33,8 @@ const OrderPage: React.FC = () => {
 
   // 세션 및 메뉴 초기화
   useEffect(() => {
-    initializeSession();
     loadMenuCategories();
-  }, [initializeSession, loadMenuCategories]);
+  }, [loadMenuCategories]);
 
   // 주문 페이지로 이동
   const handleCheckout = () => {
