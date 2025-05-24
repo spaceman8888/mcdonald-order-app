@@ -78,7 +78,7 @@ const CheckoutPage: React.FC = () => {
         ...chatMessages,
         {
           role: "assistant",
-          content: `지금까지 선택하신 메뉴는 오른쪽 화면에 있습니다. 내용을 확인하신 후, 결제를 진행해 주세요.\n\n주문하신 메뉴의 총 금액은 ${cartItems
+          content: `지금까지 선택하신 메뉴는 오른쪽 화면에 있습니다. 내용을 확인하신 후, 카드를 넣고 결제를 진행해 주세요.\n\n주문하신 메뉴의 총 금액은 ${cartItems
             .reduce((sum, item) => sum + item.price * item.quantity, 0)
             .toLocaleString()}원 입니다.`,
         },

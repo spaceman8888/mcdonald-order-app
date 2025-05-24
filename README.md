@@ -1,25 +1,26 @@
 # AI 맥도날드 키오스크
 
-## 목표
+### 1. 토이프로젝트의 목표
 
 1. langchain을 사용해보자.
 2. 백엔드 없이 db까지 연동된 앱을 만들어보자.
 
-## JavaScript로 langchain을 사용할 수 있다!
+### 2. 프론트엔드에서 langchain을 사용해보자.
 
-LangChain.js : 프론트엔드에서
+LangChain.js VS LangChain
 
-Supabase : Firebase와 비슷하지만 **PostgreSQL 기반의 데이터베이스를 제공**한다.
+### 3. 프론트엔드에서 db를 연동해보자.
+
+`Supabase` : Firebase와 비슷하지만 **PostgreSQL 기반의 데이터베이스를 제공**한다.
+
 ERD
+![erd](./images/erd.png)
 
-React
+### 4. 노인분들도 쉽게 사용하는 키오스크를 만들어 보자.
 
-## 기사 https://news.koreanbar.or.kr/news/articleView.html?idxno=32941
+![article1](./images/article1.png)
+![article2](./images/article2.png)
+![article3](./images/article3.png)
+![article4](./images/article4.png)
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+![sad_grandma](./images/sad_grandma.png)
