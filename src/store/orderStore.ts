@@ -4,7 +4,6 @@ import { CartItem, ChatMessage, MenuCategory, MenuItem } from "../types";
 import * as menuService from "../services/menuService";
 import * as orderService from "../services/orderService";
 import { OrderAssistant } from "../services/langchainService";
-import { useNavigate } from "react-router-dom";
 
 interface OrderState {
   // 세션 상태
@@ -50,6 +49,7 @@ interface OrderState {
   removeItemByName: (menuId: number) => void;
 
   setNavigate: (navigate: (path: string) => void) => void;
+  setChatMessages: (chatMessages: ChatMessage[]) => void;
 }
 
 export const useOrderStore = create<OrderState>((set, get) => ({
@@ -387,15 +387,36 @@ export const useOrderStore = create<OrderState>((set, get) => ({
 
   // 장바구니에서 아이템 제거
   removeFromCart: (index: number) => {
-    const { cartItems, orderAssistant } = get();
+    const { cartItems, orderAssistant, chatMessages } = get();
     console.log("removeFromCart", cartItems, index);
     const updatedCart = cartItems.filter((_, i) => i !== index);
     set({ cartItems: updatedCart });
 
     // 주문 도우미에 장바구니 업데이트 알림
+    // if (orderAssistant) {
+    //   orderAssistant.initializeConversation(updatedCart);
+    // }
+
+    // 채팅 메시지로 알림
     if (orderAssistant) {
+      // 주문 도우미에 장바구니 업데이트 알림
       orderAssistant.initializeConversation(updatedCart);
+
+      // 사용자에게 추가 확인 메시지
+      set({
+        chatMessages: [
+          ...chatMessages,
+          {
+            role: "assistant",
+            content: `장바구니에서 ${cartItems[index].name}을(를) 제거했습니다.`,
+          },
+        ],
+      });
     }
+  },
+
+  setChatMessages: (chatMessages: ChatMessage[]) => {
+    set({ chatMessages });
   },
 
   // 장바구니 아이템 수량 변경
@@ -468,17 +489,9 @@ export const useOrderStore = create<OrderState>((set, get) => ({
     }
   },
 
-  // 고객 정보 설정(제거 예정)
-  // setCustomerInfo: (name: string, phone: string) => {
-  //   set({
-  //     customerName: name,
-  //     customerPhone: phone
-  //   });
-  // },
-
   // 주문 완료
   completeOrder: async () => {
-    const { cartItems, sessionId } = get();
+    const { cartItems } = get();
 
     if (cartItems.length === 0) {
       return false;

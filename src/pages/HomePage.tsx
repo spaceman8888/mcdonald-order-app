@@ -30,7 +30,8 @@ const HomePage = () => {
         src={homeImage}
         alt="맥도날드 홈화면"
         style={{
-          maxWidth: "100%", // 화면 너비의 80%로 제한
+          // maxWidth: "80%", // 화면 너비의 80%로 제한
+          maxHeight: "40%",
           height: "auto", // 비율 유지
           objectFit: "contain", // 이미지 비율 유지하면서 컨테이너에 맞춤
         }}
@@ -39,7 +40,8 @@ const HomePage = () => {
         src={homeImage2}
         alt="맥도날드 홈화면"
         style={{
-          maxWidth: "100%", // 화면 너비의 80%로 제한
+          // maxWidth: "80%", // 화면 너비의 80%로 제한
+          maxHeight: "40%",
           height: "auto", // 비율 유지
           objectFit: "contain", // 이미지 비율 유지하면서 컨테이너에 맞춤
         }}

@@ -6,8 +6,6 @@ import {
   AIMessage,
 } from "@langchain/core/messages";
 import { CartItem, ChatMessage, MenuItem } from "../types";
-import { supabase } from "./supabase";
-import { useOrderStore } from "../store/orderStore";
 import { getMenuItems } from "./menuService";
 // 대화 기록
 interface ConversationState {
@@ -17,19 +15,18 @@ interface ConversationState {
 // LLM 모델 설정
 const chatModel = new ChatOpenAI({
   modelName: "gpt-4o",
-  temperature: 0.4,
+  temperature: 0.2,
   openAIApiKey: process.env.REACT_APP_OPENAI_API_KEY,
 });
 
 // 대화 모델을 위한 시스템 프롬프트 생성
-const getSystemPrompt = async (cartItems: CartItem[]) => {
+const getSystemPrompt = async (cartItems: CartItem[], orderNumber?: number) => {
   const cartSummary = formatCartItems(cartItems);
   const menuItems = await formatMenuItems();
 
   const systemPropmpt = `당신은 맥도날드 주문을 돕는 AI 주문 키오스크입니다. 고객이 메뉴를 선택하고 주문할 수 있도록 친절하게 안내해 주세요.
 
     맥도날드 지점은 부산 해운대구 센텀서로구로 100번길 10 맥도날드 센텀점입니다.
-    만약에 고객이 사투리로 말하면 해당 사투리로 응답해주세요.
 
     현재 고객의 장바구니:
     ${cartSummary}
@@ -38,7 +35,7 @@ const getSystemPrompt = async (cartItems: CartItem[]) => {
     ${menuItems}
     
     주문 번호:
-
+    ${orderNumber ?? ""}
 
     당신의 역할:
     1. 고객의 메뉴 질문에 답변하기 (메뉴 추천, 메뉴 설명 등)
@@ -49,7 +46,7 @@ const getSystemPrompt = async (cartItems: CartItem[]) => {
     6. 메뉴 정보를 그대로 보여주지는 말고 메뉴 이름과 가격만 보여줘
 
 
-    7. 고객이 메뉴를 주문하려 할 때는 다음 형식으로 응답하고 추가되었다는 메시지를 보내줘:
+    7. 고객이 메뉴를 주문하려 할 때는 다음 형식으로 응답하고 추가되었다는 메시지를 보내주고 더 필요한게 있는지 물어봐줘:
     MENU_ADD|메뉴ID|수량|옵션ID1,옵션ID2,...
 
     ex) MENU_ADD|1|1|2
@@ -64,13 +61,13 @@ const getSystemPrompt = async (cartItems: CartItem[]) => {
     9. 고객이 메뉴를 제거하려 할 때는 다음 형식으로 응답하고 제거되었다는 메시지를 보내줘:
     MENU_REMOVE|메뉴ID
 
-    10. MENU_ADD, MENU_UPDATE, MENU_REMOVE 형식이 아니면 대화중인 메뉴에 따라 아래 형식으로 응답하고 메뉴 추천 메시지를 보내줘
-    SHOW_BURGER
-    SHOW_SIDE
-    SHOW_DRINK
-    SHOW_DESSERT
+    10. MENU_ADD, MENU_UPDATE, MENU_REMOVE 형식이 아니면 대화중인 카테고리 메뉴에 따라 아래 형식으로 응답하고 친절하게 설명해줘
+    SHOW_BURGER : 버거에 대해 대화할 때
+    SHOW_SIDE : 사이드에 대해 대화할 때
+    SHOW_DRINK : 음료에 대해 대화할 때
+    SHOW_DESSERT : 디저트에 대해 대화할 때
 
-    11.주문을 완료하겠다는 답변이 있으면 아래 형식으로 응답해주고 끝인사 없이 총 주문 금액이 얼마인지, 결제하라는 메시지를 보내줘
+    11.주문을 완료하겠다는 답변이 있으면 아래 형식으로 응답해주고 오른쪽 화면에 표시된 메뉴를 확인하고 결제하라는 메시지를 보내줘. 아직 완료된게 아니니 감사하다 같은 끝맺음 인사는 하지 말아줘
     ORDER_COMPLETE
 
 
@@ -120,10 +117,10 @@ const formatMenuItems = async () => {
   const menuItems = (await getMenuItems()) as MenuItem[];
 
   console.log("menuItems", menuItems);
-  let result = `메뉴 ID - 메뉴 이름 - 가격\n`;
+  let result = `메뉴 ID - 메뉴 이름 - 가격 - 카테고리 \n`;
 
   menuItems.forEach((item) => {
-    result += `${item.id} - ${item.name} - ${item.price}\n`;
+    result += `${item.id} - ${item.name} - ${item.price} - ${item.menu_categories?.name}\n`;
   });
 
   return result;

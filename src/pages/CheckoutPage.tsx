@@ -3,7 +3,6 @@ import {
   Container,
   Paper,
   Typography,
-  TextField,
   Button,
   Box,
   Grid,
@@ -14,6 +13,8 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useOrderStore } from "../store/orderStore";
+import CountUp from "react-countup";
+import { motion } from "framer-motion";
 
 const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
@@ -43,6 +44,27 @@ const CheckoutPage: React.FC = () => {
     }
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+      },
+    },
+  };
+
   return (
     <Container maxWidth="xl">
       <Grid container spacing={3}>
@@ -56,9 +78,21 @@ const CheckoutPage: React.FC = () => {
 
             <Divider sx={{ my: 2 }} />
 
-            <List disablePadding>
+            <List
+              disablePadding
+              component={motion.div}
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+            >
               {cartItems.map((item, index) => (
-                <ListItem key={index} disablePadding sx={{ py: 1 }}>
+                <ListItem
+                  key={index}
+                  disablePadding
+                  sx={{ py: 1 }}
+                  component={motion.div}
+                  variants={itemVariants}
+                >
                   <ListItemText
                     primary={
                       <Typography variant="body1">
@@ -100,7 +134,7 @@ const CheckoutPage: React.FC = () => {
                 color="primary"
                 sx={{ fontWeight: "bold" }}
               >
-                {totalPrice.toLocaleString()}원
+                <CountUp end={totalPrice} duration={1} separator="," />원
               </Typography>
             </Box>
           </Paper>

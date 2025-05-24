@@ -10,9 +10,6 @@ const OrderPage: React.FC = () => {
   const navigate = useNavigate();
 
   const {
-    // 세션 상태
-    initializeSession,
-
     // 메뉴 상태
     menuCategories,
     selectedCategoryId,
@@ -29,6 +26,11 @@ const OrderPage: React.FC = () => {
 
     // 네비게이션 상태
     setNavigate,
+
+    // 주문 도우미 상태
+    orderAssistant,
+    chatMessages,
+    setChatMessages,
   } = useOrderStore();
 
   // 세션 및 메뉴 초기화
@@ -40,6 +42,20 @@ const OrderPage: React.FC = () => {
   const handleCheckout = () => {
     if (cartItems.length > 0) {
       navigate("/checkout");
+    }
+
+    if (orderAssistant) {
+      // 사용자에게 추가 확인 메시지
+      setChatMessages([
+        ...chatMessages,
+        {
+          role: "assistant",
+          content: `지금까지 주문하신 메뉴는 오른쪽 화면에 있습니다. 주문하신 메뉴를 확인하고 결제해주세요.\n총 금액은 ${cartItems.reduce(
+            (sum, item) => sum + item.price * item.quantity,
+            0
+          )}원 입니다.`,
+        },
+      ]);
     }
   };
 

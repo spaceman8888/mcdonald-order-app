@@ -19,9 +19,18 @@ export const getMenuCategories = async (): Promise<MenuCategory[]> => {
 export const getMenuItems = async (): Promise<MenuItem[]> => {
   const { data, error } = await supabase
     .from("menu_items")
-    .select("*")
+    .select(
+      `
+      *,
+      menu_categories!category_id (
+        name
+      )
+      `
+    )
     .eq("is_available", true)
     .order("id", { ascending: true });
+
+  console.log("data", data);
 
   if (error) {
     console.error("메뉴 아이템 조회 실패:", error);

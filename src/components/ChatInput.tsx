@@ -1,11 +1,5 @@
-import React, { useState } from "react";
-import {
-  Box,
-  TextField,
-  IconButton,
-  CircularProgress,
-  TextareaAutosize,
-} from "@mui/material";
+import React, { useRef, useState } from "react";
+import { Box, TextField, IconButton, CircularProgress } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 
 interface ChatInputProps {
@@ -15,12 +9,14 @@ interface ChatInputProps {
 
 const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
   const [message, setMessage] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (message.trim() && !isLoading) {
-      onSendMessage(message);
+      await onSendMessage(message);
       setMessage("");
+      inputRef.current?.focus();
     }
   };
 
@@ -35,6 +31,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
       }}
     >
       <TextField
+        inputRef={inputRef}
         fullWidth
         value={message}
         onChange={(e) => setMessage(e.target.value)}
