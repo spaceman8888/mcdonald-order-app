@@ -145,22 +145,30 @@ export const useOrderStore = create<OrderState>((set, get) => ({
           }
           case "SHOW_BURGER": {
             console.log("SHOW_BURGER");
-            get().loadMenuItems(1);
+            if (get().selectedCategoryId !== 1) {
+              get().loadMenuItems(1);
+            }
             break;
           }
           case "SHOW_SIDE": {
             console.log("SHOW_SIDE");
-            get().loadMenuItems(2);
+            if (get().selectedCategoryId !== 2) {
+              get().loadMenuItems(2);
+            }
             break;
           }
           case "SHOW_DRINK": {
             console.log("SHOW_DRINK");
-            get().loadMenuItems(3);
+            if (get().selectedCategoryId !== 3) {
+              get().loadMenuItems(3);
+            }
             break;
           }
           case "SHOW_DESSERT": {
             console.log("SHOW_DESSERT");
-            get().loadMenuItems(4);
+            if (get().selectedCategoryId !== 4) {
+              get().loadMenuItems(4);
+            }
             break;
           }
           case "ORDER_COMPLETE": {

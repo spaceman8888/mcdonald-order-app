@@ -43,20 +43,6 @@ const OrderPage: React.FC = () => {
     if (cartItems.length > 0) {
       navigate("/checkout");
     }
-
-    if (orderAssistant) {
-      // 사용자에게 추가 확인 메시지
-      setChatMessages([
-        ...chatMessages,
-        {
-          role: "assistant",
-          content: `지금까지 주문하신 메뉴는 오른쪽 화면에 있습니다. 주문하신 메뉴를 확인하고 결제해주세요.\n총 금액은 ${cartItems.reduce(
-            (sum, item) => sum + item.price * item.quantity,
-            0
-          )}원 입니다.`,
-        },
-      ]);
-    }
   };
 
   useEffect(() => {

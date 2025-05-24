@@ -12,6 +12,19 @@ interface ConversationState {
   messages: (HumanMessage | SystemMessage | AIMessage)[];
 }
 
+interface ActionType {
+  type:
+    | "ADD_MENU"
+    | "UPDATE_MENU"
+    | "REMOVE_MENU"
+    | "SHOW_BURGER"
+    | "SHOW_SIDE"
+    | "SHOW_DRINK"
+    | "SHOW_DESSERT"
+    | "ORDER_COMPLETE";
+  payload: any;
+}
+
 // LLM 모델 설정
 const chatModel = new ChatOpenAI({
   modelName: "gpt-4o",
@@ -67,7 +80,7 @@ const getSystemPrompt = async (cartItems: CartItem[], orderNumber?: number) => {
     SHOW_DRINK : 음료에 대해 대화할 때
     SHOW_DESSERT : 디저트에 대해 대화할 때
 
-    11.주문을 완료하겠다는 답변이 있으면 아래 형식으로 응답해주고 오른쪽 화면에 표시된 메뉴를 확인하고 결제하라는 메시지를 보내줘. 아직 완료된게 아니니 감사하다 같은 끝맺음 인사는 하지 말아줘
+    11.주문을 완료하겠다는 답변이 있으면 아래 형식으로 응답해주고 다른 말은 하지 말아줘.
     ORDER_COMPLETE
 
 
@@ -288,11 +301,7 @@ export class OrderAssistant {
 
       console.log("cleanedContent", cleanedContent);
 
-      return {
-        aiMessage: {
-          role: "assistant",
-          content: cleanedContent,
-        },
+      const result = {
         action: action as
           | {
               type:
@@ -307,7 +316,19 @@ export class OrderAssistant {
               payload: any;
             }
           | undefined,
+      } as {
+        aiMessage: ChatMessage;
+        action: ActionType;
       };
+
+      if (cleanedContent !== "") {
+        result.aiMessage = {
+          role: "assistant",
+          content: cleanedContent,
+        };
+      }
+
+      return result;
     } catch (error) {
       console.error("대화 처리 중 오류 발생:", error);
 

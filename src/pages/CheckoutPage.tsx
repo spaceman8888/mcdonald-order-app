@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Container,
   Paper,
@@ -19,7 +19,13 @@ import { motion } from "framer-motion";
 const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
 
-  const { cartItems, completeOrder } = useOrderStore();
+  const {
+    cartItems,
+    completeOrder,
+    orderAssistant,
+    setChatMessages,
+    chatMessages,
+  } = useOrderStore();
 
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -64,6 +70,22 @@ const CheckoutPage: React.FC = () => {
       },
     },
   };
+
+  useEffect(() => {
+    if (orderAssistant) {
+      // 사용자에게 추가 확인 메시지
+      setChatMessages([
+        ...chatMessages,
+        {
+          role: "assistant",
+          content: `지금까지 선택하신 메뉴는 오른쪽 화면에 있습니다. 내용을 확인하신 후, 결제를 진행해 주세요.\n\n주문하신 메뉴의 총 금액은 ${cartItems
+            .reduce((sum, item) => sum + item.price * item.quantity, 0)
+            .toLocaleString()}원 입니다.`,
+        },
+      ]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Container maxWidth="xl">
@@ -134,7 +156,7 @@ const CheckoutPage: React.FC = () => {
                 color="primary"
                 sx={{ fontWeight: "bold" }}
               >
-                <CountUp end={totalPrice} duration={1} separator="," />원
+                <CountUp end={totalPrice} duration={1.5} separator="," />원
               </Typography>
             </Box>
           </Paper>
@@ -152,7 +174,7 @@ const CheckoutPage: React.FC = () => {
                 size="large"
                 onClick={() => navigate("/order")}
               >
-                주문으로 돌아가기
+                뒤로가기
               </Button>
             </Box>
             <Box component="form" onSubmit={handleSubmit}>
