@@ -37,6 +37,7 @@ function App() {
   } = useOrderStore();
 
   const location = useLocation();
+  console.log(location.pathname);
 
   const isHomePage = useMemo(
     () => location.pathname === "/mcdonald-order-app/",
