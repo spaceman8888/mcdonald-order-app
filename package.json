@@ -17,7 +17,7 @@
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^13.5.0",
     "@types/jest": "^27.5.2",
-    "@types/node": "^16.18.126",
+    "@types/node": "^22.15.21",
     "@types/react": "^19.1.4",
     "@types/react-dom": "^19.1.5",
     "framer-motion": "^12.12.2",
@@ -33,10 +33,9 @@
     "zustand": "^5.0.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build"
   },
@@ -57,5 +56,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "vite": "^6.3.5",
+    "@vitejs/plugin-react": "^4.5.0"
   }
 }

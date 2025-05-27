@@ -29,7 +29,7 @@ interface ActionType {
 const chatModel = new ChatOpenAI({
   modelName: "gpt-4o",
   temperature: 0.2,
-  openAIApiKey: process.env.REACT_APP_OPENAI_API_KEY,
+  openAIApiKey: import.meta.env.VITE_OPENAI_API_KEY,
 });
 
 // 대화 모델을 위한 시스템 프롬프트 생성
