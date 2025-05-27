@@ -10,7 +10,7 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename="/mcdonald-order-app">
       <App />
     </BrowserRouter>
   </React.StrictMode>
