@@ -1,7 +1,5 @@
 import { Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import homeImage from "../assets/home.jpg";
-import homeImage2 from "../assets/home2.jpg";
 import { useEffect } from "react";
 import { useOrderStore } from "../store/orderStore";
 
@@ -27,7 +25,7 @@ const HomePage = () => {
       }}
     >
       <img
-        src={homeImage}
+        src="/home.jpg"
         alt="맥도날드 홈화면"
         style={{
           // maxWidth: "80%", // 화면 너비의 80%로 제한
@@ -37,7 +35,7 @@ const HomePage = () => {
         }}
       />
       <img
-        src={homeImage2}
+        src="/home2.jpg"
         alt="맥도날드 홈화면"
         style={{
           // maxWidth: "80%", // 화면 너비의 80%로 제한
