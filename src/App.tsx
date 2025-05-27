@@ -39,10 +39,7 @@ function App() {
   const location = useLocation();
   console.log(location.pathname);
 
-  const isHomePage = useMemo(
-    () => location.pathname === "/mcdonald-order-app/",
-    [location]
-  );
+  const isHomePage = useMemo(() => location.pathname === "/", [location]);
   console.log(isHomePage);
   return (
     <ThemeProvider theme={theme}>
@@ -102,16 +99,10 @@ function App() {
             }}
           >
             <Routes>
-              <Route path="/mcdonald-order-app" element={<HomePage />} />
-              <Route path="/mcdonald-order-app/order" element={<OrderPage />} />
-              <Route
-                path="/mcdonald-order-app/checkout"
-                element={<CheckoutPage />}
-              />
-              <Route
-                path="/mcdonald-order-app/complete"
-                element={<CompletePage />}
-              />
+              <Route path="/" element={<HomePage />} />
+              <Route path="/order" element={<OrderPage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/complete" element={<CompletePage />} />
             </Routes>
           </Box>
         </Box>
