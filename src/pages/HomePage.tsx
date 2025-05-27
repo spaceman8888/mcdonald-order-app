@@ -25,7 +25,7 @@ const HomePage = () => {
       }}
     >
       <img
-        src="/home.jpg"
+        src="/mcdonald-order-app/home.jpg"
         alt="맥도날드 홈화면"
         style={{
           // maxWidth: "80%", // 화면 너비의 80%로 제한
@@ -35,7 +35,7 @@ const HomePage = () => {
         }}
       />
       <img
-        src="/home2.jpg"
+        src="/mcdonald-order-app/home2.jpg"
         alt="맥도날드 홈화면"
         style={{
           // maxWidth: "80%", // 화면 너비의 80%로 제한
